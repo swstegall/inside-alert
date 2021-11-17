@@ -8,13 +8,16 @@
     "@emotion/server": "latest",
     "@emotion/styled": "latest",
     "@mui/material": "latest",
+    "animate.css": "^4.1.1",
     "bootstrap-css-only": "^4.4.1",
     "clsx": "latest",
-    "d3": "^7.1.1",
+    "echarts": "^5.2.2",
+    "echarts-for-react": "^3.0.2",
     "next": "latest",
     "prop-types": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-use": "^17.3.1"
   },
   "scripts": {
     "dev": "next",

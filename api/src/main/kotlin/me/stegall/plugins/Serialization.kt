@@ -13,32 +13,37 @@ import me.stegall.data.Position
 import me.stegall.data.TradeActivity
 
 fun Application.configureSerialization() {
-    install(ContentNegotiation) {
-        json()
-    }
+  install(ContentNegotiation) {
+    json()
+  }
 
-    routing {
-        get("/values") {
-            if (call.request.headers["APCA-API-KEY-ID"] != null && call.request.headers["APCA-API-SECRET-KEY"] != null) {
-                val (request, response, result) = "https://paper-api.alpaca.markets/v2/positions"
-                    .httpGet()
-                    .header("APCA-API-KEY-ID", call.request.headers["APCA-API-KEY-ID"]!!)
-                    .header("APCA-API-SECRET-KEY", call.request.headers["APCA-API-SECRET-KEY"]!!)
-                    .responseString()
-                when (result) {
-                    is Result.Failure -> {
-                        val ex = result.getException()
-                        call.respondText(ex.toString())
-                    }
-                    is Result.Success -> {
-                        val data = result.get()
-                        val something = Json.decodeFromString<ArrayList<Position>>(data)
-                        call.respond(something)
-                    }
-                }
-            } else {
-                call.respondText("Missing required headers")
-            }
+  routing {
+    get("/values") {
+      if (call.request.headers["APCA-API-KEY-ID"] != null && call.request.headers["APCA-API-SECRET-KEY"] != null) {
+        val (request, response, result) = "https://paper-api.alpaca.markets/v2/positions"
+          .httpGet()
+          .header("APCA-API-KEY-ID", call.request.headers["APCA-API-KEY-ID"]!!)
+          .header("APCA-API-SECRET-KEY", call.request.headers["APCA-API-SECRET-KEY"]!!)
+          .responseString()
+        when (result) {
+          is Result.Failure -> {
+            val ex = result.getException()
+            call.respondText(ex.toString())
+          }
+          is Result.Success -> {
+            val data = result.get()
+            val something = Json.decodeFromString<ArrayList<Position>>(data)
+            call.respond(something)
+          }
         }
+      } else {
+        call.respondText("Missing required headers")
+      }
     }
+    get("/scores") {
+      if (call.request.headers["APCA-API-KEY-ID"] != null && call.request.headers["APCA-API-SECRET-KEY"] != null) {
+        call.respondText("scores")
+      }
+    }
+  }
 }

@@ -9,6 +9,7 @@
     "@emotion/styled": "latest",
     "@mui/material": "latest",
     "animate.css": "^4.1.1",
+    "axios": "^0.24.0",
     "bootstrap-css-only": "^4.4.1",
     "clsx": "latest",
     "echarts": "^5.2.2",

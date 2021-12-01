@@ -11,6 +11,7 @@ import ExampleChart from "../src/individualComponents/ExampleChart";
 export default function Index() {
   const [apiKeyID, setAPIKeyID] = React.useState("");
   const [secretKey, setSecretKey] = React.useState("");
+  const [keysSet, setKeysSet] = React.useState(false);
 
   return (
     <>
@@ -36,6 +37,7 @@ export default function Index() {
                     label="API Key ID"
                     value={apiKeyID}
                     onChange={(e) => setAPIKeyID(e.target.value)}
+                    disabled={keysSet}
                   />
                 </div>
                 <div className={"col"}>
@@ -45,6 +47,7 @@ export default function Index() {
                     label="Secret Key"
                     value={secretKey}
                     onChange={(e) => setSecretKey(e.target.value)}
+                    disabled={keysSet}
                   />
                 </div>
                 <div
@@ -52,7 +55,26 @@ export default function Index() {
                     "col d-flex align-items-center justify-content-flex-begin"
                   }
                 >
-                  <Button variant="contained">Request Info</Button>
+                  {keysSet ? (
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        setAPIKeyID("");
+                        setSecretKey("");
+                        setKeysSet(false);
+                      }}
+                    >
+                      Change
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      onClick={() => setKeysSet(true)}
+                      disabled={apiKeyID === "" || secretKey === ""}
+                    >
+                      Set
+                    </Button>
+                  )}
                 </div>
               </div>
               <div className={"row pt-4"}>

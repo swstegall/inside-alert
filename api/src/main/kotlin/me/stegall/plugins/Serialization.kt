@@ -5,16 +5,16 @@ import com.github.kittinunf.result.Result
 import io.ktor.serialization.*
 import io.ktor.features.*
 import io.ktor.application.*
-import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import me.stegall.data.Position
+import me.stegall.data.StockResponse
 import me.stegall.services.Values
 import me.stegall.data.Value
-import java.time.LocalDate
-import java.util.*
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -29,7 +29,7 @@ fun Application.configureSerialization() {
     get("/values") {
       val valuesMap = HashMap<String, ArrayList<Value>>()
       if (call.request.headers["APCA-API-KEY-ID"] != null && call.request.headers["APCA-API-SECRET-KEY"] != null) {
-        val (request, response, result) = "https://paper-api.alpaca.markets/v2/positions"
+        val (_request, _response, result) = "https://paper-api.alpaca.markets/v2/positions"
           .httpGet()
           .header("APCA-API-KEY-ID", call.request.headers["APCA-API-KEY-ID"]!!)
           .header("APCA-API-SECRET-KEY", call.request.headers["APCA-API-SECRET-KEY"]!!)
@@ -53,24 +53,42 @@ fun Application.configureSerialization() {
                 valuesMap.put(value.symbol, arr)
               }
             }
-            valuesMap.forEach({
-              val symbol = it.key
-              val (request, response, result) = "https://data.alpaca.markets/v2/stocks/${symbol}/trades?start=2020-02-06T13:04:56.334320128Z&limit=1"
-                .httpGet()
-                .header("APCA-API-KEY-ID", call.request.headers["APCA-API-KEY-ID"]!!)
-                .header("APCA-API-SECRET-KEY", call.request.headers["APCA-API-SECRET-KEY"]!!)
-                .responseString()
-              when (result) {
-                is Result.Failure -> {
-                  val ex = result.getException()
-                  call.respondText(ex.toString())
-                }
-                is Result.Success -> {
-                  println(result.get())
-                  call.respondText(result.get())
+            val startDates = arrayOf(
+              OffsetDateTime.now().minusMonths(6).format(DateTimeFormatter.ISO_DATE_TIME),
+              OffsetDateTime.now().minusMonths(3).format(DateTimeFormatter.ISO_DATE_TIME),
+              OffsetDateTime.now().minusMonths(1).format(DateTimeFormatter.ISO_DATE_TIME),
+              OffsetDateTime.now().minusWeeks(2).format(DateTimeFormatter.ISO_DATE_TIME),
+              OffsetDateTime.now().minusWeeks(1).format(DateTimeFormatter.ISO_DATE_TIME),
+              OffsetDateTime.now().minusDays(1).format(DateTimeFormatter.ISO_DATE_TIME),
+            )
+            for (startDate in startDates) {
+              valuesMap.forEach {
+                val symbol = it.key
+                val (_request, _response, result) = "https://data.alpaca.markets/v2/stocks/${symbol}/trades?start=${startDate}&limit=1"
+                  .httpGet()
+                  .header("APCA-API-KEY-ID", call.request.headers["APCA-API-KEY-ID"]!!)
+                  .header("APCA-API-SECRET-KEY", call.request.headers["APCA-API-SECRET-KEY"]!!)
+                  .responseString()
+                when (result) {
+                  is Result.Failure -> {
+                    val ex = result.getException()
+                    call.respondText(ex.toString())
+                  }
+                  is Result.Success -> {
+                    val historicalData = Json.decodeFromString<StockResponse>(result.get())
+                    val historicalDataValues = historicalData.trades;
+                    val arr = valuesMap.get(symbol);
+                    for (historyPoint in historicalDataValues) {
+                      if (arr != null) {
+                        arr.add(Value(symbol, historyPoint.s, historyPoint.p, historyPoint.t))
+                        valuesMap.put(symbol, arr)
+                      }
+                    }
+                  }
                 }
               }
-            })
+            }
+            call.respond(valuesMap)
           }
         }
       } else {

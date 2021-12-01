@@ -5,13 +5,73 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import KeyIcon from "@mui/icons-material/Key";
+import KeyOffIcon from "@mui/icons-material/KeyOff";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import InsightsIcon from "@mui/icons-material/Insights";
+import { CircularProgress } from "@mui/material";
+import axios from "axios";
 import PageCard from "../src/individualComponents/PageCard";
-import ExampleChart from "../src/individualComponents/ExampleChart";
+import constants from "../src/utilities/constants";
 
-export default function Index() {
+const Index = () => {
   const [apiKeyID, setAPIKeyID] = React.useState("");
   const [secretKey, setSecretKey] = React.useState("");
   const [keysSet, setKeysSet] = React.useState(false);
+  const [valuesSelected, setValuesSelected] = React.useState(false);
+  const [scoresSelected, setScoresSelected] = React.useState(false);
+  const [valuesLoaded, setValuesLoaded] = React.useState(false);
+  const [scoresLoaded, setScoresLoaded] = React.useState(false);
+  const [values, setValues] = React.useState(null);
+  const [scores, setScores] = React.useState(null);
+
+  const changeKeys = () => {
+    setValuesSelected(false);
+    setScoresSelected(false);
+    setValuesLoaded(false);
+    setScoresLoaded(false);
+    setValues(null);
+    setScores(null);
+    setAPIKeyID("");
+    setSecretKey("");
+    setKeysSet(false);
+  };
+
+  const loadValues = async () => {
+    setValuesSelected(true);
+    setScoresSelected(false);
+    setValuesLoaded(false);
+    setScoresLoaded(false);
+    setValues(null);
+    setScores(null);
+    try {
+      const response = await axios({
+        method: "get",
+        url: `${constants.APIUrl}/values`,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "APCA-API-KEY-ID": apiKeyID,
+          "APCA-API-SECRET-KEY": secretKey,
+        }
+      });
+      setValues(response.data);
+      console.log(response);
+      console.log(values);
+      setValuesLoaded(true);
+    } catch (error) {
+      console.log("Error!");
+    }
+  };
+
+  const loadScores = async () => {
+    setScoresSelected(true);
+    setValuesSelected(false);
+    setValuesLoaded(false);
+    setScoresLoaded(false);
+    setValues(null);
+    setScores(null);
+  };
 
   return (
     <>
@@ -29,7 +89,7 @@ export default function Index() {
         <PageCard
           render={
             <>
-              <div className={"row pt-4"}>
+              <div className={"row"}>
                 <div className={"col"}>
                   <TextField
                     fullWidth
@@ -50,42 +110,97 @@ export default function Index() {
                     disabled={keysSet}
                   />
                 </div>
+              </div>
+              <div className={"row pt-3"}>
                 <div
                   className={
                     "col d-flex align-items-center justify-content-flex-begin"
                   }
                 >
-                  {keysSet ? (
+                  <div className={"pr-2"}>
+                    {keysSet ? (
+                      <Button
+                        variant="contained"
+                        onClick={changeKeys}
+                        startIcon={<KeyOffIcon />}
+                      >
+                        Change Keys
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        onClick={() => setKeysSet(true)}
+                        disabled={apiKeyID === "" || secretKey === ""}
+                        startIcon={<KeyIcon />}
+                      >
+                        Set Keys
+                      </Button>
+                    )}
+                  </div>
+                  <div className={"pr-2"}>
                     <Button
-                      variant="contained"
-                      onClick={() => {
-                        setAPIKeyID("");
-                        setSecretKey("");
-                        setKeysSet(false);
-                      }}
+                      variant={"contained"}
+                      startIcon={<BarChartIcon />}
+                      disabled={!keysSet}
+                      onClick={loadValues}
                     >
-                      Change
+                      Values
                     </Button>
+                  </div>
+                  <Button
+                    variant={"contained"}
+                    startIcon={<InsightsIcon />}
+                    disabled={!keysSet}
+                    onClick={loadScores}
+                  >
+                    Scores
+                  </Button>
+                </div>
+              </div>
+              {valuesSelected && (
+                <>
+                  {valuesLoaded ? (
+                    <div className={"row pt-4"}>
+                      <div className={"col"}>Values</div>
+                    </div>
                   ) : (
-                    <Button
-                      variant="contained"
-                      onClick={() => setKeysSet(true)}
-                      disabled={apiKeyID === "" || secretKey === ""}
-                    >
-                      Set
-                    </Button>
+                    <div className={"row pt-3"}>
+                      <div
+                        className={
+                          "col d-flex align-items-center justify-content-center"
+                        }
+                      >
+                        <CircularProgress size={"4em"} />
+                      </div>
+                    </div>
                   )}
-                </div>
-              </div>
-              <div className={"row pt-4"}>
-                <div className={"col"}>
-                  <ExampleChart />
-                </div>
-              </div>
+                </>
+              )}
+              {scoresSelected && (
+                <>
+                  {scoresLoaded ? (
+                    <div className={"row pt-4"}>
+                      <div className={"col"}>Scores</div>
+                    </div>
+                  ) : (
+                    <div className={"row pt-3"}>
+                      <div
+                        className={
+                          "col d-flex align-items-center justify-content-center"
+                        }
+                      >
+                        <CircularProgress size={"4em"} />
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </>
           }
         />
       </div>
     </>
   );
-}
+};
+
+export default Index;

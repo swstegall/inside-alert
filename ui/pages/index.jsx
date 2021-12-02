@@ -13,6 +13,7 @@ import { CircularProgress } from "@mui/material";
 import axios from "axios";
 import PageCard from "../src/individualComponents/PageCard";
 import constants from "../src/utilities/constants";
+import Stock from "../src/individualComponents/Stock";
 
 const Index = () => {
   const [apiKeyID, setAPIKeyID] = React.useState("");
@@ -53,11 +54,9 @@ const Index = () => {
           "Content-Type": "application/json",
           "APCA-API-KEY-ID": apiKeyID,
           "APCA-API-SECRET-KEY": secretKey,
-        }
+        },
       });
       setValues(response.data);
-      console.log(response);
-      console.log(values);
       setValuesLoaded(true);
     } catch (error) {
       console.log("Error!");
@@ -160,8 +159,10 @@ const Index = () => {
               {valuesSelected && (
                 <>
                   {valuesLoaded ? (
-                    <div className={"row pt-4"}>
-                      <div className={"col"}>Values</div>
+                    <div className={"container-fluid"}>
+                      {Object.keys(values).map((v) => (
+                        <Stock title={v} values={values[v]} />
+                      ))}
                     </div>
                   ) : (
                     <div className={"row pt-3"}>

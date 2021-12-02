@@ -11,13 +11,12 @@ fun main() {
   embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
     install(CORS) {
       method(HttpMethod.Options)
-      method(HttpMethod.Put)
-      method(HttpMethod.Patch)
-      method(HttpMethod.Delete)
-      anyHost()
+      method(HttpMethod.Post)
+      method(HttpMethod.Get)
       header(HttpHeaders.ContentType)
-      header(HttpHeaders.Authorization)
-      allowSameOrigin = true
+      header("APCA-API-KEY-ID")
+      header("APCA-API-SECRET-KEY")
+      anyHost()
     }
     configureSerialization()
   }.start(wait = true)

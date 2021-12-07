@@ -10,10 +10,8 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
-import me.stegall.data.Position
-import me.stegall.data.StockResponse
+import me.stegall.data.*
 import me.stegall.services.Values
-import me.stegall.data.Value
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
@@ -97,8 +95,59 @@ fun Application.configureSerialization() {
       }
     }
     get("/scores") {
+      val valuesMap = HashMap<String, ArrayList<Value>>()
       if (call.request.headers["APCA-API-KEY-ID"] != null && call.request.headers["APCA-API-SECRET-KEY"] != null) {
-        call.respondText("scores")
+        val (_request, _response, result) = "https://paper-api.alpaca.markets/v2/positions"
+          .httpGet()
+          .header("APCA-API-KEY-ID", call.request.headers["APCA-API-KEY-ID"]!!)
+          .header("APCA-API-SECRET-KEY", call.request.headers["APCA-API-SECRET-KEY"]!!)
+          .responseString()
+        when (result) {
+          is Result.Failure -> {
+            val ex = result.getException()
+            call.respondText(ex.toString())
+          }
+          is Result.Success -> {
+            val data = result.get()
+            val currentPositions = Json.decodeFromString<ArrayList<Position>>(data)
+            val minifiedPositions = ArrayList<MinifiedPosition>()
+            for (position in currentPositions) {
+              minifiedPositions.add(
+                MinifiedPosition(
+                  position.symbol,
+                  position.avg_entry_price.toFloat(),
+                  position.qty.toLong()
+                )
+              )
+            }
+            val (_request, _response, result) = "https://paper-api.alpaca.markets/v2/orders?status=closed"
+              .httpGet()
+              .header("APCA-API-KEY-ID", call.request.headers["APCA-API-KEY-ID"]!!)
+              .header("APCA-API-SECRET-KEY", call.request.headers["APCA-API-SECRET-KEY"]!!)
+              .responseString()
+            when (result) {
+              is Result.Failure -> {
+                val ex = result.getException()
+                call.respondText(ex.toString())
+              }
+              is Result.Success -> {
+                val data = result.get()
+                val allOrders = Json.decodeFromString<ArrayList<Order>>(data).filter {
+                  var present = false
+                  for (position in minifiedPositions) {
+                    if (position.symbol == it.symbol) {
+                      present = true
+                    }
+                  }
+                  present
+                }
+                println(allOrders)
+              }
+            }
+          }
+        }
+      } else {
+        call.respondText("Missing required headers")
       }
     }
   }

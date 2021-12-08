@@ -14,7 +14,7 @@ import axios from "axios";
 import PageCard from "../src/individualComponents/PageCard";
 import constants from "../src/utilities/constants";
 import Stock from "../src/individualComponents/Stock";
-import ScoresSection from "../src/individualComponents/ScoresSection";
+import Scores from "../src/individualComponents/Scores";
 
 const Index = () => {
   const [apiKeyID, setAPIKeyID] = React.useState("");
@@ -198,7 +198,7 @@ const Index = () => {
                 <>
                   {scoresLoaded ? (
                     <>
-                      <ScoresSection scores={scores} />
+                      <Scores scores={scores} />
                     </>
                   ) : (
                     <div className={"row pt-3"}>

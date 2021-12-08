@@ -14,6 +14,7 @@ import axios from "axios";
 import PageCard from "../src/individualComponents/PageCard";
 import constants from "../src/utilities/constants";
 import Stock from "../src/individualComponents/Stock";
+import ScoresSection from "../src/individualComponents/ScoresSection";
 
 const Index = () => {
   const [apiKeyID, setAPIKeyID] = React.useState("");
@@ -70,6 +71,22 @@ const Index = () => {
     setScoresLoaded(false);
     setValues(null);
     setScores(null);
+    try {
+      const response = await axios({
+        method: "get",
+        url: `${constants.APIUrl}/scores`,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "APCA-API-KEY-ID": apiKeyID,
+          "APCA-API-SECRET-KEY": secretKey,
+        },
+      });
+      setScores(response.data);
+      setScoresLoaded(true);
+    } catch (error) {
+      console.log("Error!");
+    }
   };
 
   return (
@@ -180,9 +197,9 @@ const Index = () => {
               {scoresSelected && (
                 <>
                   {scoresLoaded ? (
-                    <div className={"row pt-4"}>
-                      <div className={"col"}>Scores</div>
-                    </div>
+                    <>
+                      <ScoresSection scores={scores} />
+                    </>
                   ) : (
                     <div className={"row pt-3"}>
                       <div

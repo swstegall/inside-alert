@@ -95,7 +95,7 @@ fun Application.configureSerialization() {
       }
     }
     get("/scores") {
-      val valuesMap = HashMap<String, ArrayList<Value>>()
+      val scoresMap = HashMap<String, PaddedScore>()
       if (call.request.headers["APCA-API-KEY-ID"] != null && call.request.headers["APCA-API-SECRET-KEY"] != null) {
         val (_request, _response, result) = "https://paper-api.alpaca.markets/v2/positions"
           .httpGet()
@@ -141,7 +141,17 @@ fun Application.configureSerialization() {
                   }
                   present
                 }
-                println(allOrders)
+                for (position in minifiedPositions) {
+                  val startDates = arrayOf(
+                    OffsetDateTime.now().minusMonths(6).format(DateTimeFormatter.ISO_DATE_TIME),
+                    OffsetDateTime.now().minusMonths(3).format(DateTimeFormatter.ISO_DATE_TIME),
+                    OffsetDateTime.now().minusMonths(1).format(DateTimeFormatter.ISO_DATE_TIME),
+                    OffsetDateTime.now().minusWeeks(2).format(DateTimeFormatter.ISO_DATE_TIME),
+                    OffsetDateTime.now().minusWeeks(1).format(DateTimeFormatter.ISO_DATE_TIME),
+                    OffsetDateTime.now().minusDays(1).format(DateTimeFormatter.ISO_DATE_TIME),
+                  )
+                }
+                call.respond(scoresMap)
               }
             }
           }

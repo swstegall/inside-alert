@@ -26,7 +26,7 @@ const Stock = ({ title, values }) => {
     <>
       <div className={"row pt-4"}>
         <div className={"col d-flex align-items-center"}>
-          <Typography variant={"h3"}>{title}</Typography>
+          <Typography variant={"h4"}>{title}</Typography>
         </div>
       </div>
       <div className={"row pt-4"}>

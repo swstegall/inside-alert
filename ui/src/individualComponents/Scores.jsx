@@ -11,7 +11,7 @@ import StockScoreChart from "./StockScoreChart";
 
 const FormattedPortfolioScore = ({ score }) => {
   if (score >= 1.25) {
-    return <div style={{ color: "red" }}>{score}</div>;
+    return <div style={{ color: "red" }}>{score.toFixed(3)}</div>;
   } else {
     return <div>{score.toFixed(3)}</div>;
   }
@@ -19,7 +19,7 @@ const FormattedPortfolioScore = ({ score }) => {
 
 const FormattedIndividualScore = ({ score }) => {
   if (score >= 1.5) {
-    return <div style={{ color: "red" }}>{score}</div>;
+    return <div style={{ color: "red" }}>{score.toFixed(3)}</div>;
   } else {
     return <div>{score.toFixed(3)}</div>;
   }

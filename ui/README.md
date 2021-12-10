@@ -1,44 +1,52 @@
-# Next.js example
+# Inside Alert UI
 
-## How to use
+## Requirements
 
-Download the example [or clone the repo](https://github.com/mui-org/material-ui):
+In order to run this application, users must have the following software installed.
 
-<!-- #default-branch-switch -->
+- Node (v 12 or higher)
+- Yarn
 
-```sh
-curl https://codeload.github.com/mui-org/material-ui/tar.gz/master | tar -xz --strip=2  material-ui-master/examples/nextjs
-cd nextjs
+## Installing Dependencies and Configuration
+
+- In a terminal, navigate to this directory.
+- Issue the command `yarn`.
+- In the `src/utilities` directory, issue the command `cp constantsTemplate.js constants.js`.
+
+## Running Locally
+
+- Using a text editor, modify `constants.js` and input the IP address and port that the API is using. If on the same system running the API, this should be `const host = "localhost";` and `const port = "8080";`.
+- From the `ui` folder, issue the command `yarn dev`. You can then view the UI by opening a browser and navigating to `http://localhost:3000`.
+
+## Building for Production
+
+- Using a text editor, modify `constants.js` and input the IP address and port that the API is using.
+- From the `ui` folder, issue the command `yarn build`.
+
+## Deploying on Linux (systemd)
+
+- Create a shell script to run the UI. This may be something like:
+
+`/home/username/inside-alert-ui`:
+```bash
+#!/usr/bin/bash
+cd ~/inside-alert/ui
+npx next start
 ```
 
-Install it and run:
+- Create a systemd service file as root to initiate your runscript. This may be something like:
 
-```sh
-npm install
-npm run dev
+`/etc/systemd/system/inside-alert-ui.service`:
+```s
+[Unit]
+Description=Start inside-alert-ui
+
+[Service]
+Type=oneshot
+ExecStart=/home/username/inside-alert-ui
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-or:
-
-<!-- #default-branch-switch -->
-
-[![Edit on CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/mui-org/material-ui/tree/master/examples/nextjs)
-
-## The idea behind the example
-
-The project uses [Next.js](https://github.com/zeit/next.js), which is a framework for server-rendered React apps.
-It includes `@mui/material` and its peer dependencies, including `emotion`, the default style engine in MUI v5.
-If you prefer, you can [use styled-components instead](https://mui.com/guides/interoperability/#styled-components).
-
-## The link component
-
-Next.js has [a custom Link component](https://nextjs.org/docs/api-reference/next/link).
-The example folder provides adapters for usage with MUI.
-More information [in the documentation](https://mui.com/guides/routing/#next-js).
-
-## What's next?
-
-<!-- #default-branch-switch -->
-
-You now have a working example project.
-You can head back to the documentation, continuing browsing it from the [templates](https://mui.com/getting-started/templates/) section.
+- Enable the service with `systemctl enable inside-alert-ui.service`, then reboot the host with `reboot`.
